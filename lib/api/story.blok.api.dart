@@ -20,4 +20,17 @@ class StoryApi {
     }
     return null;
   }
+
+  Future<dynamic> getLocalOfProduct(String locaId) async {
+    print("···········getLocalOfProduct·············");
+    print("··········· $locaId ·············");
+    http.Response json = await http.get(
+        "$baseUrl/stories/$locaId?version=draft&token=$tokenDomigun&find_by=uuid");
+    if (json.statusCode == 200) {
+      Map<String, dynamic> body = jsonDecode(json.body);
+      print(body["story"]);
+      return body["story"];
+    }
+    return null;
+  }
 }

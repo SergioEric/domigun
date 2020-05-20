@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:domicilios_sahagun/stying/colors.dart';
+import 'package:domicilios_sahagun/utilities/format.strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -8,30 +9,32 @@ import 'package:google_fonts/google_fonts.dart';
 import '../api/story.blok.api.dart';
 import 'detail_product_page.dart';
 
+import 'dart:math' as math;
+
 class HomePage extends StatelessWidget {
   final StoryApi api = new StoryApi();
+  int previousValue = 6;
 
   void openConnection() {
     api.getData("products");
   }
 
-  String formatImageUrl(String url, String resolution) {
-    // return "https:$url";
-    // String url =
-    //     "//a.storyblok.com/f/84282/1280x853/e989585237/campfire-1031141_1280.jpg";
-    String formatedUrl;
-    List<String> splited = url.split("/");
-    splited.removeAt(2);
-    splited.insert(2, "img2.storyblok.com");
-    splited.insert(
-      3,
-      resolution,
-    );
-    formatedUrl = splited.join("/");
-    return "https:$formatedUrl";
-    // print(splited);
-    // print(splited.join("/"));
-    // print("object");
+  final List<Color> colors = [
+    light1.withOpacity(0.3),
+    light2.withOpacity(0.3),
+    light3.withOpacity(0.3),
+    purple.withOpacity(0.15),
+    light3.withOpacity(0.3),
+  ];
+
+  Color pickRandomColor() {
+    int random = math.Random().nextInt(5);
+    // print("previousValue = $previousValue");
+    //nos aseguramos que no se repitan un color
+    if (previousValue == random) return pickRandomColor();
+    previousValue = random;
+    // print("random = $random");
+    return colors[random];
   }
 
   @override
@@ -42,16 +45,7 @@ class HomePage extends StatelessWidget {
       body: SafeArea(
         bottom: false,
         child: Column(
-          // mainAxisAlignment: MainAxisAlignment.center,
-          // crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            // SizedBox(
-            //   width: double.infinity,
-            // ),
-            // FlatButton(
-            //   onPressed: openConnection,
-            //   child: Text("call api"),
-            // ),
             SizedBox(
               height: 36,
               width: size.width,
@@ -73,8 +67,6 @@ class HomePage extends StatelessWidget {
               height: 20,
             ),
             Column(
-              // fit: StackFit.expand,
-              // alignment: Alignment.centerRight,
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
@@ -82,7 +74,6 @@ class HomePage extends StatelessWidget {
                   width: size.width,
                 ),
                 Container(
-                  // alignment: Alignment.centerRight,
                   height: 40,
                   width: 140,
                   decoration: BoxDecoration(
@@ -109,14 +100,35 @@ class HomePage extends StatelessWidget {
             SizedBox(
               height: 20,
             ),
+            Row(
+              children: <Widget>[
+                Container(
+                    margin: EdgeInsets.only(left: 15, top: 10, bottom: 10),
+                    child: Text(
+                      "Categorias",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    )),
+              ],
+            ),
             Container(
               height: 110,
-              // margin: EdgeInsets.all(12),
-              child: ListView.builder(
-                physics: BouncingScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                itemBuilder: (context, i) => categoryWidget(),
+              child: FutureBuilder(
+                future: api.getData("categories"),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    List<dynamic> categories = snapshot.data;
+                    return ListView(
+                        physics: BouncingScrollPhysics(),
+                        scrollDirection: Axis.horizontal,
+                        children: categories
+                            .map((cat) => categoryWidget(
+                                background: pickRandomColor(),
+                                name: cat["content"]["name"]))
+                            .toList());
+                  }
+                  return Image.asset("assets/design/Spinner-1s-224px.gif");
+                },
               ),
             ),
             SizedBox(
@@ -138,32 +150,6 @@ class HomePage extends StatelessWidget {
                 child: Products(productsWidget),
               ),
             )
-            // Expanded(
-            //   child: FutureBuilder(
-            //       future: api.getData("products"),
-            //       builder: (context, snapshot) {
-            //         if (snapshot.connectionState == ConnectionState.none) {
-            //           return Text("sin internet");
-            //         }
-            //         if (snapshot.hasData) {
-            //           List<dynamic> posts = snapshot.data;
-            //           // return Text("${snapshot.data}");
-            //           return StaggeredGridView.countBuilder(
-            //             itemBuilder: (context, index) => productsWidget(
-            //                 posts[index]["content"]["name"],
-            //                 posts[index]["content"]["price"],
-            //                 posts[index]["content"]["image"]),
-            //             itemCount: posts.length,
-            //             crossAxisCount: 4,
-            //             staggeredTileBuilder: (int index) =>
-            //                 new StaggeredTile.count(2, index.isEven ? 2 : 3),
-            //             mainAxisSpacing: 4.0,
-            //             crossAxisSpacing: 4.0,
-            //           );
-            //         }
-            //         return Container();
-            //       }),
-            // )
             // MaterialButton(onPressed: (){
             //    FlutterOpenWhatsapp.sendSingleMessage("+573046797488", "Hello from flutter");
             //  },
@@ -175,14 +161,14 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget categoryWidget() {
+  Widget categoryWidget({Color background, String name}) {
     return Container(
       width: 100,
       height: 100,
       margin: EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(19),
-        color: dark.withOpacity(0.09),
+        color: background,
       ),
       child: Stack(
         children: <Widget>[
@@ -191,13 +177,13 @@ class HomePage extends StatelessWidget {
             padding: EdgeInsets.all(12),
             child: Icon(
               FontAwesomeIcons.hamburger,
-              color: color1,
+              color: dark.withOpacity(0.2),
             ),
           ),
           Container(
             padding: EdgeInsets.all(8),
             alignment: Alignment.bottomCenter,
-            child: Text("Comida Rápidaaaa"),
+            child: Text(name),
           )
         ],
       ),
@@ -225,6 +211,11 @@ class HomePage extends StatelessWidget {
             CachedNetworkImage(
               imageUrl: "https:$image",
               fit: BoxFit.fitHeight,
+              placeholder: (context, string) {
+                return Image.asset(
+                  "assets/design/Ellipsis-1s-200px.gif",
+                );
+              },
             ),
             Align(
               alignment: Alignment.bottomCenter,
@@ -286,7 +277,7 @@ class Products extends StatelessWidget {
                 )),
                 child: productsWidget(
                     posts[index]["content"]["name"],
-                    posts[index]["content"]["price"],
+                    FormatString.formatPrice(posts[index]["content"]["price"]),
                     posts[index]["content"]["image"]),
               ),
               itemCount: posts.length,
@@ -299,7 +290,10 @@ class Products extends StatelessWidget {
               padding: EdgeInsets.all(6),
             );
           }
-          return Container();
+          return Image.asset(
+            "assets/design/Bean Eater-1s-317px.gif",
+            width: 200,
+          );
         });
   }
 }
