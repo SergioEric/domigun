@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:domicilios_sahagun/stying/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -5,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 // import 'package:flutter_open_whatsapp/flutter_open_whatsapp.dart';
 import '../api/story.blok.api.dart';
+import 'detail_product_page.dart';
 
 class HomePage extends StatelessWidget {
   final StoryApi api = new StoryApi();
@@ -203,6 +205,9 @@ class HomePage extends StatelessWidget {
   }
 
   Widget productsWidget(String name, String price, String image) {
+    // CachedNetworkImage(
+    //   imageUrl: "https:$image",
+    // );
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
       child: ClipRRect(
@@ -210,45 +215,45 @@ class HomePage extends StatelessWidget {
         child: Container(
             // margin: EdgeInsets.only(bottom: 10),
             // padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: NetworkImage("https:$image"),
-                    fit: BoxFit.fitHeight)),
+            // decoration: BoxDecoration(
+            //     image: DecorationImage(
+            //         image: NetworkImage("https:$image"),
+            //         fit: BoxFit.fitHeight)),
             child: Stack(
-              children: <Widget>[
-                // Image.network(
-                //   "https:$image",
-                //   // formatImageUrl(image, "149x143"),
-                //   fit: BoxFit.fitHeight,
-                // ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                      // height: 50,
-                      // alignment: Alignment.center,
-                      width: double.infinity,
-                      color: Colors.white.withOpacity(0.6),
-                      child: Text(
-                        name,
-                        style: TextStyle(fontSize: 18),
-                        textAlign: TextAlign.center,
-                      )),
+          fit: StackFit.expand,
+          children: <Widget>[
+            CachedNetworkImage(
+              imageUrl: "https:$image",
+              fit: BoxFit.fitHeight,
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                  // height: 50,
+                  // alignment: Alignment.center,
+                  width: double.infinity,
+                  color: Colors.white.withOpacity(0.6),
+                  child: Text(
+                    name,
+                    style: TextStyle(fontSize: 18),
+                    textAlign: TextAlign.center,
+                  )),
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                padding: EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                    color: dark.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(10)),
+                child: Text(
+                  "\$ $price",
+                  style: TextStyle(color: Colors.white, fontSize: 22),
                 ),
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    padding: EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                        color: dark.withOpacity(0.6),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Text(
-                      "\$ $price",
-                      style: TextStyle(color: Colors.white, fontSize: 22),
-                    ),
-                  ),
-                )
-              ],
-            )),
+              ),
+            )
+          ],
+        )),
       ),
     );
   }
@@ -275,10 +280,15 @@ class Products extends StatelessWidget {
             List<dynamic> posts = snapshot.data;
             // return Text("${snapshot.data}");
             return StaggeredGridView.countBuilder(
-              itemBuilder: (context, index) => productsWidget(
-                  posts[index]["content"]["name"],
-                  posts[index]["content"]["price"],
-                  posts[index]["content"]["image"]),
+              itemBuilder: (context, index) => GestureDetector(
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => DetailProductPage(product: posts[index]),
+                )),
+                child: productsWidget(
+                    posts[index]["content"]["name"],
+                    posts[index]["content"]["price"],
+                    posts[index]["content"]["image"]),
+              ),
               itemCount: posts.length,
               crossAxisCount: 4,
               staggeredTileBuilder: (int index) =>
@@ -288,17 +298,6 @@ class Products extends StatelessWidget {
               physics: BouncingScrollPhysics(),
               padding: EdgeInsets.all(6),
             );
-            // return ListView(
-            //   children: posts
-            //       .map((post) => ListTile(
-            //             title: Text(post["content"]["name"]),
-            //             trailing: Image.network(
-            //                 formatImageUrl(post["content"]["image"])),
-            //             subtitle:
-            //                 Text("\$ ${post["content"]["price"]}"),
-            //           ))
-            //       .toList(),
-            // );
           }
           return Container();
         });
