@@ -33,4 +33,15 @@ class StoryApi {
     }
     return null;
   }
+
+  Future<dynamic> getProductsOfCategory(String categoryUUID) async {
+    http.Response json = await http.get(
+        "$baseUrl/stories?version=draft&token=$tokenDomigun&starts_with=products&filter_query[category][like]=$categoryUUID");
+    if (json.statusCode == 200) {
+      Map<String, dynamic> body = jsonDecode(json.body);
+      print(body["stories"]);
+      return body["stories"];
+    }
+    return null;
+  }
 }

@@ -11,6 +11,8 @@ import 'detail_product_page.dart';
 
 import 'dart:math' as math;
 
+import 'list.products.page.dart';
+
 class HomePage extends StatelessWidget {
   final StoryApi api = new StoryApi();
   int previousValue = 6;
@@ -122,9 +124,18 @@ class HomePage extends StatelessWidget {
                         physics: BouncingScrollPhysics(),
                         scrollDirection: Axis.horizontal,
                         children: categories
-                            .map((cat) => categoryWidget(
-                                background: pickRandomColor(),
-                                name: cat["content"]["name"]))
+                            .map((cat) => GestureDetector(
+                                  onTap: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                          builder: (_) =>
+                                              ListProductsOfCategory(
+                                                  uuid: cat["uuid"],
+                                                  categoryName: cat["content"]
+                                                      ["name"]))),
+                                  child: categoryWidget(
+                                      background: pickRandomColor(),
+                                      name: cat["content"]["name"]),
+                                ))
                             .toList());
                   }
                   return Image.asset("assets/design/Spinner-1s-224px.gif");
