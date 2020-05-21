@@ -4,6 +4,8 @@ import 'package:domicilios_sahagun/utilities/format.strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_open_whatsapp/flutter_open_whatsapp.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:maps_launcher/maps_launcher.dart';
+
 import '../api/story.blok.api.dart';
 
 class DetailProductPage extends StatefulWidget {
@@ -102,17 +104,81 @@ class _DetailProductPageState extends State<DetailProductPage> {
                             widget.product["content"]["local"]),
                         builder: (context, AsyncSnapshot<dynamic> snapshot) {
                           if (snapshot.hasData) {
-                            return Container(
-                              height: 21,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Text(
-                                    "${snapshot.data["content"]["name"]}",
-                                    style: TextStyle(color: dark, fontSize: 18),
-                                  )
-                                ],
-                              ),
+                            return Column(
+                              children: <Widget>[
+                                Container(
+                                  height: 21,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Text(
+                                        "${snapshot.data["content"]["name"]}",
+                                        style: TextStyle(
+                                            color: dark, fontSize: 18),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: <Widget>[
+                                    Column(
+                                      children: <Widget>[
+                                        SizedBox(
+                                          // width: size.width * 0.5,
+                                          child: Text(
+                                            "Whatsapp",
+                                            style: TextStyle(color: color1),
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: () {
+                                            FlutterOpenWhatsapp.sendSingleMessage(
+                                                "+57 ${snapshot.data["content"]["phoneNumber"]}",
+                                                "Hello from flutter");
+                                          },
+                                          icon: Icon(
+                                            FontAwesomeIcons.whatsapp,
+                                            color: color1,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      children: <Widget>[
+                                        SizedBox(
+                                          // width: size.width * 0.5,
+                                          child: Text(
+                                            "Ubicación del lugar",
+                                            style: TextStyle(
+                                                color: Color(0xffFF6C6C)),
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: () =>
+                                              MapsLauncher.launchCoordinates(
+                                                  num.parse(snapshot
+                                                              .data["content"]
+                                                          ["location"][0]
+                                                      ["latitude"]),
+                                                  num.parse(
+                                                      snapshot.data["content"]
+                                                              ["location"][0]
+                                                          ["longitude"])),
+                                          icon: Icon(
+                                            FontAwesomeIcons.mapMarkerAlt,
+                                            color: Color(0xffFF6C6C),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                )
+                              ],
                             );
                           }
                           return Container(
@@ -123,53 +189,6 @@ class _DetailProductPageState extends State<DetailProductPage> {
                               ));
                         },
                       ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: <Widget>[
-                          Column(
-                            children: <Widget>[
-                              SizedBox(
-                                // width: size.width * 0.5,
-                                child: Text(
-                                  "Whatsapp",
-                                  style: TextStyle(color: color1),
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () {
-                                  FlutterOpenWhatsapp.sendSingleMessage(
-                                      "+573046797488", "Hello from flutter");
-                                },
-                                icon: Icon(
-                                  FontAwesomeIcons.whatsapp,
-                                  color: color1,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: <Widget>[
-                              SizedBox(
-                                // width: size.width * 0.5,
-                                child: Text(
-                                  "Ubicación del lugar",
-                                  style: TextStyle(color: Color(0xffFF6C6C)),
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  FontAwesomeIcons.mapMarkerAlt,
-                                  color: Color(0xffFF6C6C),
-                                ),
-                              )
-                            ],
-                          ),
-                        ],
-                      )
                     ],
                   ),
                 ),
