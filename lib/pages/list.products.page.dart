@@ -6,6 +6,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../api/story.blok.api.dart';
 import 'detail_product_page.dart';
 
+import 'dart:math' as math;
+
 class ListProductsOfCategory extends StatelessWidget {
   final String uuid;
   final String categoryName;
@@ -38,31 +40,8 @@ class ListProductsOfCategory extends StatelessWidget {
                     if (products.length == 0) return noProducts();
                     return ListView(
                       physics: BouncingScrollPhysics(),
-                      children: products
-                          .map((p) => ListTile(
-                                title: Text("${p["content"]["name"]}"),
-                                subtitle: Text(
-                                    "\$ ${FormatString.formatPrice(p["content"]["price"])}"),
-                                leading: CachedNetworkImage(
-                                  imageUrl: FormatString.formatImageUrl(
-                                      p["content"]["image"], "140x120"),
-                                  fit: BoxFit.fitHeight,
-                                  placeholder: (context, string) {
-                                    return Image.asset(
-                                      "assets/design/Ellipsis-1s-200px.gif",
-                                    );
-                                  },
-                                ),
-                                trailing: IconButton(
-                                  icon: Icon(FontAwesomeIcons.arrowRight),
-                                  onPressed: () => Navigator.of(context)
-                                      .push(MaterialPageRoute(
-                                    builder: (_) =>
-                                        DetailProductPage(product: p),
-                                  )),
-                                ),
-                              ))
-                          .toList(),
+                      children:
+                          products.map((p) => rawProduct(p, context)).toList(),
                     );
                   }
                   return Image.asset("assets/design/Spinner-1s-224px.gif");
@@ -102,7 +81,72 @@ class ListProductsOfCategory extends StatelessWidget {
     );
   }
 
-  Widget rawProduct(){
-    
+  final List<Color> colors = [
+    light1.withRed(randomBetween255()),
+    light2.withRed(randomBetween255()),
+    light3.withRed(randomBetween255()),
+    purple.withRed(randomBetween255()),
+    light3.withRed(randomBetween255()),
+  ];
+
+  static int randomBetween255() {
+    int random = math.Random().nextInt(255);
+    return random;
+  }
+
+  Color pickRandomColor() {
+    int random = math.Random().nextInt(5);
+    return colors[random];
+  }
+
+  Widget rawProduct(dynamic product, BuildContext context) {
+    return Container(
+      width: 152,
+      height: 147,
+      margin: EdgeInsets.all(12),
+      child: Row(
+        children: <Widget>[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: CachedNetworkImage(
+              imageUrl: FormatString.formatImageUrl(
+                  product["content"]["image"], "152x147"),
+              fit: BoxFit.fitHeight,
+              placeholder: (context, string) {
+                return Image.asset(
+                  "assets/design/Ellipsis-1s-200px.gif",
+                );
+              },
+            ),
+          ),
+          SizedBox(
+            width: 12,
+          ),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  product["content"]["name"],
+                  style: TextStyle(fontSize: 22),
+                ),
+                Text(
+                  "\$ ${FormatString.formatPrice(product["content"]["price"])}",
+                  style: TextStyle(fontSize: 16),
+                ),
+                IconButton(
+                  icon: Icon(FontAwesomeIcons.arrowRight,
+                      color: pickRandomColor()),
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => DetailProductPage(product: product),
+                  )),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
   }
 }
