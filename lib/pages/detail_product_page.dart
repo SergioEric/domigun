@@ -32,14 +32,29 @@ class _DetailProductPageState extends State<DetailProductPage> {
       child: Column(
         // mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          CachedNetworkImage(
-            imageUrl: "https:${widget.product["content"]["image"]}",
-            progressIndicatorBuilder: (context, url, downloadProgress) =>
-                CircularProgressIndicator(value: downloadProgress.progress),
-            errorWidget: (context, url, error) => Icon(Icons.error),
-            fit: BoxFit.fitHeight,
-            width: double.infinity,
-            height: size.height * 0.65,
+          Stack(
+            children: <Widget>[
+              CachedNetworkImage(
+                imageUrl: "https:${widget.product["content"]["image"]}",
+                progressIndicatorBuilder: (context, url, downloadProgress) =>
+                    CircularProgressIndicator(value: downloadProgress.progress),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+                fit: BoxFit.fitHeight,
+                width: double.infinity,
+                height: size.height * 0.65,
+              ),
+              Container(
+                // decoration: BoxDecoration(
+                //     color: dark.withOpacity(0.4), shape: BoxShape.circle),
+                margin: EdgeInsets.only(top: 35),
+                child: RawMaterialButton(
+                    padding: EdgeInsets.all(12),
+                    shape: CircleBorder(),
+                    fillColor: dark.withOpacity(0.4),
+                    onPressed: () => Navigator.pop(context),
+                    child: Icon(Icons.arrow_back_ios, color: light1)),
+              ),
+            ],
           ),
           Container(
             margin: EdgeInsets.only(bottom: 20, top: 10),

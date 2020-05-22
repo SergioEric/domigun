@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:domicilios_sahagun/stying/colors.dart';
 import 'package:domicilios_sahagun/utilities/format.strings.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -19,15 +20,24 @@ class ListProductsOfCategory extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            Text("${this.categoryName}"),
+            SizedBox(
+              height: 24,
+            ),
+            Text("${this.categoryName}",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 24, color: purple)),
+            SizedBox(
+              height: 24,
+            ),
             Expanded(
               child: FutureBuilder(
                 future: api.getProductsOfCategory(uuid),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     List<dynamic> products = snapshot.data;
-                    if (products.length == 0) return Text("sin productos");
+                    if (products.length == 0) return noProducts();
                     return ListView(
+                      physics: BouncingScrollPhysics(),
                       children: products
                           .map((p) => ListTile(
                                 title: Text("${p["content"]["name"]}"),
@@ -63,5 +73,36 @@ class ListProductsOfCategory extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget noProducts() {
+    return Container(
+      alignment: Alignment.topCenter,
+      margin: EdgeInsets.only(top: 90),
+      child: Column(
+        children: <Widget>[
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(color: color2, shape: BoxShape.circle),
+            child: Icon(
+              FontAwesomeIcons.info,
+              color: dark,
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            "Sin Productos Agregados",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget rawProduct(){
+    
   }
 }

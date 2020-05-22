@@ -244,7 +244,7 @@ class HomePage extends StatelessWidget {
             Align(
               alignment: Alignment.topCenter,
               child: Container(
-                padding: EdgeInsets.all(2),
+                padding: EdgeInsets.all(3),
                 decoration: BoxDecoration(
                     color: dark.withOpacity(0.6),
                     borderRadius: BorderRadius.circular(10)),
