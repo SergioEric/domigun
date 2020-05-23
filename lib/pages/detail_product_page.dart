@@ -20,8 +20,6 @@ class DetailProductPage extends StatefulWidget {
 class _DetailProductPageState extends State<DetailProductPage> {
   final StoryApi api = new StoryApi();
 
-  Future<dynamic> a() async {}
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;

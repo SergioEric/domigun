@@ -1,7 +1,13 @@
 class FormatString {
   static String formatPrice(String price) {
     List<String> formated = price.split("");
-    formated.insert(1, ".");
+    if (price.length > 5) {
+      formated.insert(3, ".");
+    } else if (price.length > 4) {
+      formated.insert(2, ".");
+    } else {
+      formated.insert(1, ".");
+    }
     return formated.join("");
   }
 

@@ -15,7 +15,7 @@ class StoryApi {
     if (json.statusCode == 200) {
       Map<String, dynamic> body = jsonDecode(json.body);
       // print(body["stories"][0]);
-      print(body["stories"]);
+      // print(body["stories"]);
       return body["stories"];
     }
     return null;
@@ -28,7 +28,7 @@ class StoryApi {
         "$baseUrl/stories/$locaId?version=draft&token=$tokenDomigun&find_by=uuid");
     if (json.statusCode == 200) {
       Map<String, dynamic> body = jsonDecode(json.body);
-      print(body["story"]);
+      // print(body["story"]);
       return body["story"];
     }
     return null;
@@ -39,7 +39,18 @@ class StoryApi {
         "$baseUrl/stories?version=draft&token=$tokenDomigun&starts_with=products&filter_query[category][like]=$categoryUUID");
     if (json.statusCode == 200) {
       Map<String, dynamic> body = jsonDecode(json.body);
-      print(body["stories"]);
+      // print(body["stories"]);
+      return body["stories"];
+    }
+    return null;
+  }
+
+  Future<List<dynamic>> searchProductsByName(String name) async {
+    http.Response json = await http.get(
+        "$baseUrl/stories?version=draft&token=$tokenDomigun&starts_with=products&filter_query[name][like]=*$name*");
+    if (json.statusCode == 200) {
+      Map<String, dynamic> body = jsonDecode(json.body);
+      // print(body["stories"]);
       return body["stories"];
     }
     return null;

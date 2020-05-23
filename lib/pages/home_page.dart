@@ -13,13 +13,22 @@ import 'dart:math' as math;
 
 import 'list.products.page.dart';
 
-class HomePage extends StatelessWidget {
-  final StoryApi api = new StoryApi();
-  int previousValue = 6;
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
 
-  void openConnection() {
-    api.getData("products");
+class _HomePageState extends State<HomePage> {
+  final StoryApi api = new StoryApi();
+  Future<dynamic> futureCategories;
+
+  @override
+  initState() {
+    super.initState();
+    futureCategories = api.getData("categories");
   }
+
+  int previousValue = 6;
 
   final List<Color> colors = [
     light1.withOpacity(0.3),
@@ -44,6 +53,15 @@ class HomePage extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.white,
+      // appBar: AppBar(
+      //   actions: <Widget>[
+      //     IconButton(
+      //         onPressed: () {
+      //           showSearch(context: context, delegate: ProductsSearch());
+      //         },
+      //         icon: Icon(Icons.search))
+      //   ],
+      // ),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -84,7 +102,9 @@ class HomePage extends StatelessWidget {
                           bottomLeft: Radius.circular(20)),
                       color: color2),
                   child: InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      showSearch(context: context, delegate: ProductsSearch());
+                    },
                     child: Row(
                       children: <Widget>[
                         SizedBox(
@@ -116,7 +136,7 @@ class HomePage extends StatelessWidget {
             Container(
               height: 110,
               child: FutureBuilder(
-                future: api.getData("categories"),
+                future: this.futureCategories,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     List<dynamic> categories = snapshot.data;
@@ -194,7 +214,7 @@ class HomePage extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(8),
             alignment: Alignment.bottomCenter,
-            child: Text(name),
+            child: Text("$name"),
           )
         ],
       ),
@@ -261,19 +281,29 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class Products extends StatelessWidget {
+class Products extends StatefulWidget {
   final Function productsWidget;
   Products(this.productsWidget);
+
+  @override
+  _ProductsState createState() => _ProductsState();
+}
+
+class _ProductsState extends State<Products> {
   final StoryApi api = new StoryApi();
 
-  void openConnection() {
-    api.getData("products");
+  Future<dynamic> futureProducts;
+
+  @override
+  initState() {
+    super.initState();
+    futureProducts = api.getData("products");
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: api.getData("products"),
+        future: futureProducts,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.none) {
             return Text("sin internet");
@@ -286,7 +316,7 @@ class Products extends StatelessWidget {
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => DetailProductPage(product: posts[index]),
                 )),
-                child: productsWidget(
+                child: widget.productsWidget(
                     posts[index]["content"]["name"],
                     FormatString.formatPrice(posts[index]["content"]["price"]),
                     posts[index]["content"]["image"]),
@@ -306,5 +336,122 @@ class Products extends StatelessWidget {
             width: 200,
           );
         });
+  }
+}
+
+class ProductsSearch extends SearchDelegate<dynamic> {
+  final StoryApi api = new StoryApi();
+  Future<dynamic> futureProducts;
+
+  void searchProfucts() {
+    this.futureProducts = api.searchProductsByName(query);
+  }
+
+  final List<String> suggestions = ['Pizza', 'Cerveza', 'Arroz', 'Chorizo'];
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        onPressed: () => query = '',
+        icon: Icon(Icons.clear),
+      )
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () => close(context, null),
+      icon: Icon(Icons.arrow_back),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return ListView(
+      children: List.generate(
+          4,
+          (index) => ListTile(
+                title: Text("Index $index"),
+              )),
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    if (query.length >= 4) {
+      searchProfucts();
+      return FutureBuilder(
+        future: this.futureProducts,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            List<dynamic> products = snapshot.data;
+            if (products.length == 0) return noResults();
+
+            return ListView(
+              children: products
+                  .map((product) => GestureDetector(
+                        onTap: () =>
+                            Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => DetailProductPage(product: product),
+                        )),
+                        child: ListTile(
+                          title: Text("${product['content']['name']}"),
+                          subtitle: Text(
+                              "\$ ${FormatString.formatPrice(product['content']['price'])}"),
+                          trailing: CachedNetworkImage(
+                            imageUrl: FormatString.formatImageUrl(
+                                product["content"]["image"], "120x100"),
+                            fit: BoxFit.fitHeight,
+                            placeholder: (context, string) {
+                              return Image.asset(
+                                "assets/design/Ellipsis-1s-200px.gif",
+                              );
+                            },
+                          ),
+                        ),
+                      ))
+                  .toList(),
+            );
+          }
+          return Center(child: CircularProgressIndicator());
+          // return Image.asset("assets/design/");
+        },
+      );
+    }
+    return ListView.builder(
+        itemCount: suggestions.length,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () {
+              query = suggestions[index];
+            },
+            child: ListTile(
+              title: Text(suggestions[index]),
+            ),
+          );
+        });
+  }
+
+  Widget noResults() {
+    return Padding(
+      padding: const EdgeInsets.all(30.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(
+            Icons.info,
+            color: purple,
+          ),
+          SizedBox(
+            width: 12,
+          ),
+          Text(
+            "sin resultados",
+            style: TextStyle(fontSize: 18),
+          ),
+        ],
+      ),
+    );
   }
 }
