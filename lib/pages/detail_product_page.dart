@@ -55,6 +55,27 @@ class _DetailProductPageState extends State<DetailProductPage> {
             ],
           ),
           Container(
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "Descripción",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 12),
+                Row(
+                  children: <Widget>[
+                    Text(
+                      "${widget.product["content"]["description"]}",
+                      style: TextStyle(fontStyle: FontStyle.italic),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Container(
             margin: EdgeInsets.only(bottom: 20, top: 10),
             // alignment: Alignment.bottomCenter,
             child: Column(

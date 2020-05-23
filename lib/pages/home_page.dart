@@ -348,6 +348,8 @@ class ProductsSearch extends SearchDelegate<dynamic> {
   }
 
   final List<String> suggestions = ['Pizza', 'Cerveza', 'Arroz', 'Chorizo'];
+  List<dynamic> previousProducts = [];
+
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -368,13 +370,9 @@ class ProductsSearch extends SearchDelegate<dynamic> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return ListView(
-      children: List.generate(
-          4,
-          (index) => ListTile(
-                title: Text("Index $index"),
-              )),
-    );
+    if (previousProducts.length != 0)
+      return rawProduct(context, previousProducts);
+    return noResults();
   }
 
   @override
@@ -386,33 +384,10 @@ class ProductsSearch extends SearchDelegate<dynamic> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             List<dynamic> products = snapshot.data;
+            this.previousProducts = products;
             if (products.length == 0) return noResults();
 
-            return ListView(
-              children: products
-                  .map((product) => GestureDetector(
-                        onTap: () =>
-                            Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => DetailProductPage(product: product),
-                        )),
-                        child: ListTile(
-                          title: Text("${product['content']['name']}"),
-                          subtitle: Text(
-                              "\$ ${FormatString.formatPrice(product['content']['price'])}"),
-                          trailing: CachedNetworkImage(
-                            imageUrl: FormatString.formatImageUrl(
-                                product["content"]["image"], "120x100"),
-                            fit: BoxFit.fitHeight,
-                            placeholder: (context, string) {
-                              return Image.asset(
-                                "assets/design/Ellipsis-1s-200px.gif",
-                              );
-                            },
-                          ),
-                        ),
-                      ))
-                  .toList(),
-            );
+            return rawProduct(context, products);
           }
           return Center(child: CircularProgressIndicator());
           // return Image.asset("assets/design/");
@@ -431,6 +406,33 @@ class ProductsSearch extends SearchDelegate<dynamic> {
             ),
           );
         });
+  }
+
+  Widget rawProduct(BuildContext context, List<dynamic> products) {
+    return ListView(
+      children: products
+          .map((product) => GestureDetector(
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => DetailProductPage(product: product),
+                )),
+                child: ListTile(
+                  title: Text("${product['content']['name']}"),
+                  subtitle: Text(
+                      "\$ ${FormatString.formatPrice(product['content']['price'])}"),
+                  trailing: CachedNetworkImage(
+                    imageUrl: FormatString.formatImageUrl(
+                        product["content"]["image"], "120x100"),
+                    fit: BoxFit.fitHeight,
+                    placeholder: (context, string) {
+                      return Image.asset(
+                        "assets/design/Ellipsis-1s-200px.gif",
+                      );
+                    },
+                  ),
+                ),
+              ))
+          .toList(),
+    );
   }
 
   Widget noResults() {
